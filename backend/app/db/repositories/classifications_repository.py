@@ -2,15 +2,24 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.models.classification import Classification
-from app.db.models.category import MacroCategory, DetailCategory
 from app.db.models.classifier import Classifier
+from app.db.models.category import MacroCategory, DetailCategory
 
 
 class ClassificationRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_classification(self, text: str, classifier_id: int, macro_category_id: int, detail_category_id: int, macro_confidence: float, detail_confidence: float,):
+    def create_classification(
+        self,
+        text: str,
+        classifier_id: int,
+        macro_category_id: int,
+        detail_category_id: int,
+        macro_confidence: float,
+        detail_confidence: float,
+        secondary_predictions: list[dict],
+    ):
         classification = Classification(
             text=text,
             classifier_id=classifier_id,
@@ -18,6 +27,7 @@ class ClassificationRepository:
             detail_category_id=detail_category_id,
             macro_confidence=macro_confidence,
             detail_confidence=detail_confidence,
+            secondary_predictions=secondary_predictions,
         )
         self.db.add(classification)
         self.db.flush()
@@ -37,72 +47,71 @@ class ClassificationRepository:
         )
         return self.db.execute(stmt).scalars().all()
 
-    def get_summary_metrics(self) -> dict:
-        total = self.db.scalar(select(func.count(Classification.id))) or 0
+    def get_summary_metrics(self):
+        total_predictions = self.db.scalar(
+            select(func.count(Classification.id))
+        ) or 0
 
-        by_classifier = self.db.execute(
+        avg_macro_confidence = self.db.scalar(
+            select(func.avg(Classification.macro_confidence))
+        ) or 0.0
+
+        avg_detail_confidence = self.db.scalar(
+            select(func.avg(Classification.detail_confidence))
+        ) or 0.0
+
+        by_classifier_rows = self.db.execute(
             select(Classifier.name, func.count(Classification.id))
             .join(Classification, Classification.classifier_id == Classifier.id)
             .group_by(Classifier.name)
             .order_by(func.count(Classification.id).desc())
         ).all()
 
-        avg_macro_conf = self.db.scalar(
-            select(func.avg(Classification.macro_confidence))
-        ) or 0.0
-
-        avg_detail_conf = self.db.scalar(
-            select(func.avg(Classification.detail_confidence))
-        ) or 0.0
-
         return {
-            "total_predictions": int(total),
-            "avg_macro_confidence": float(avg_macro_conf),
-            "avg_detail_confidence": float(avg_detail_conf),
+            "total_predictions": total_predictions,
+            "avg_macro_confidence": float(avg_macro_confidence),
+            "avg_detail_confidence": float(avg_detail_confidence),
             "by_classifier": [
-                {"label": label, "value": int(value)}
-                for label, value in by_classifier
+                {"label": name, "value": count}
+                for name, count in by_classifier_rows
             ],
         }
 
-    def get_distribution_metrics(self) -> dict:
-        macro_dist = self.db.execute(
+    def get_distribution_metrics(self):
+        macro_rows = self.db.execute(
             select(MacroCategory.name, func.count(Classification.id))
             .join(Classification, Classification.macro_category_id == MacroCategory.id)
             .group_by(MacroCategory.name)
-            .order_by(func.count(Classification.id).desc(), MacroCategory.name.asc())
+            .order_by(func.count(Classification.id).desc())
         ).all()
 
-        detail_dist = self.db.execute(
+        detail_rows = self.db.execute(
             select(DetailCategory.name, func.count(Classification.id))
             .join(Classification, Classification.detail_category_id == DetailCategory.id)
             .group_by(DetailCategory.name)
-            .order_by(func.count(Classification.id).desc(), DetailCategory.name.asc())
+            .order_by(func.count(Classification.id).desc())
         ).all()
 
-        daily_volume = self.db.execute(
+        daily_rows = self.db.execute(
             select(
-                func.date_trunc("day", Classification.created_at).label("day"),
+                func.date(Classification.created_at),
                 func.count(Classification.id)
             )
-            .group_by("day")
-            .order_by("day")
+            .group_by(func.date(Classification.created_at))
+            .order_by(func.date(Classification.created_at))
         ).all()
 
         return {
             "macro_distribution": [
-                {"label": label, "value": int(value)}
-                for label, value in macro_dist
+                {"label": name, "value": count}
+                for name, count in macro_rows
             ],
             "detail_distribution": [
-                {"label": label, "value": int(value)}
-                for label, value in detail_dist
+                {"label": name, "value": count}
+                for name, count in detail_rows
             ],
             "daily_volume": [
-                {
-                    "date": day.isoformat() if hasattr(day, "isoformat") else str(day),
-                    "value": int(value),
-                }
-                for day, value in daily_volume
+                {"date": str(date_), "value": count}
+                for date_, count in daily_rows
             ],
         }

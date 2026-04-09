@@ -1,10 +1,15 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+class SecondaryPrediction(BaseModel):
+    macro: str
+    detail: str
 
 
 class ClassificationRequest(BaseModel):
     text: str
     classifier: str
+
 
 class ClassificationResponse(BaseModel):
     classifier: str
@@ -12,6 +17,7 @@ class ClassificationResponse(BaseModel):
     detail: str
     macro_confidence: float
     detail_confidence: float
+    secondary_predictions: list[SecondaryPrediction] = Field(default_factory=list)
 
 
 class GetClassificationResponse(BaseModel):
@@ -22,6 +28,7 @@ class GetClassificationResponse(BaseModel):
     detail: str
     macro_confidence: float
     detail_confidence: float
+    secondary_predictions: list[SecondaryPrediction] = Field(default_factory=list)
     created_at: datetime
 
 

@@ -1,54 +1,38 @@
-import json
-import re
-
-from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
 from sqlalchemy.orm import Session
 
 from app.core.config import OPENAI_API_KEY, OPENAI_MODEL
 from app.db.repositories.categories_repository import CategoryRepository
-from app.prompts.classification_prompt import build_classification_prompt
 
 
-def extract_first_json_object(text: str) -> dict:
-    stripped = text.strip()
-    try:
-        return json.loads(stripped)
-    except json.JSONDecodeError:
-        pass
-
-    match = re.search(r"\{.*\}", stripped, re.DOTALL)
-    if not match:
-        raise ValueError(f"Resposta inválida da OpenAI: {text}")
-
-    try:
-        return json.loads(match.group(0))
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"JSON inválido retornado pela OpenAI: {text}") from exc
+class LLMSecondaryPrediction(BaseModel):
+    macro: str
+    detail: str
 
 
-def clamp_confidence(value, default: float) -> float:
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError):
-        return default
-    return max(0.0, min(1.0, parsed))
+class LLMClassificationOutput(BaseModel):
+    macro: str = Field(description="Classe macro principal")
+    detail: str = Field(description="Classe detalhada principal, compatível com a macro principal")
+    secondary_predictions: list[LLMSecondaryPrediction] = Field(default_factory=list)
 
 
-def validate_llm_labels(macro: str, detail: str, hierarchy: dict):
+def validate_llm_output(data: LLMClassificationOutput, hierarchy: dict):
     macro_labels = hierarchy["macro_labels"]
     macro_to_detail = hierarchy["macro_to_detail"]
 
-    if macro not in macro_labels:
-        raise ValueError(
-            f"Macro inválida retornada pelo modelo: '{macro}'. Permitidas: {macro_labels}"
-        )
+    if data.macro not in macro_labels:
+        raise ValueError(f"Macro inválida: {data.macro}")
 
-    allowed_details = macro_to_detail.get(macro, [])
-    if detail not in allowed_details:
-        raise ValueError(
-            f"Detail inválido para a macro '{macro}': '{detail}'. Permitidas: {allowed_details}"
-        )
+    if data.detail not in macro_to_detail.get(data.macro, []):
+        raise ValueError(f"Detail inválida para macro {data.macro}: {data.detail}")
+
+    for item in data.secondary_predictions:
+        if item.macro not in macro_labels:
+            raise ValueError(f"Macro secundária inválida: {item.macro}")
+        if item.detail not in macro_to_detail.get(item.macro, []):
+            raise ValueError(f"Detail secundária inválida para macro {item.macro}: {item.detail}")
 
 
 def classify_with_openai(db: Session, text: str) -> dict:
@@ -61,37 +45,54 @@ def classify_with_openai(db: Session, text: str) -> dict:
     if not hierarchy["macro_labels"]:
         raise ValueError("Nenhuma categoria cadastrada no banco.")
 
-    prompt_text = build_classification_prompt(
-        text=text,
-        macro_labels=hierarchy["macro_labels"],
-        macro_to_detail=hierarchy["macro_to_detail"],
-    )
-
     llm = ChatOpenAI(
         model=OPENAI_MODEL,
         api_key=OPENAI_API_KEY,
         temperature=0,
     )
 
-    prompt = ChatPromptTemplate.from_template("{prompt}")
-    chain = prompt | llm
-    response = chain.invoke({"prompt": prompt_text})
-    data = extract_first_json_object(response.content)
+    structured_llm = llm.with_structured_output(LLMClassificationOutput)
 
-    if "macro" not in data or "detail" not in data:
-        raise ValueError(f"JSON incompleto retornado pela OpenAI: {data}")
+    prompt = ChatPromptTemplate.from_messages([
+        (
+            "system",
+            "Você é um classificador hierárquico rigoroso. "
+            "Escolha apenas classes válidas. "
+            "A classe detalhada principal deve pertencer à macro principal. "
+            "Se houver ambiguidade, registre alternativas em secondary_predictions. "
+            "Nunca invente classes."
+        ),
+        (
+            "human",
+            """Classes macro válidas:
+{macro_labels}
 
-    macro = str(data["macro"]).strip()
-    detail = str(data["detail"]).strip()
-    validate_llm_labels(macro, detail, hierarchy)
+Hierarquia macro -> detail:
+{macro_to_detail}
 
-    macro_confidence = clamp_confidence(data.get("macro_confidence"), default=0.75)
-    detail_confidence = clamp_confidence(data.get("detail_confidence"), default=0.75)
+Texto:
+{text}"""
+        )
+    ])
+
+    chain = prompt | structured_llm
+
+    result = chain.invoke({
+        "macro_labels": hierarchy["macro_labels"],
+        "macro_to_detail": hierarchy["macro_to_detail"],
+        "text": text,
+    })
+
+    validate_llm_output(result, hierarchy)
 
     return {
         "classifier": "openai",
-        "macro": macro,
-        "detail": detail,
-        "macro_confidence": macro_confidence,
-        "detail_confidence": detail_confidence,
+        "macro": result.macro,
+        "detail": result.detail,
+        "macro_confidence": 1.0,
+        "detail_confidence": 1.0,
+        "secondary_predictions": [
+            {"macro": item.macro, "detail": item.detail}
+            for item in result.secondary_predictions
+        ],
     }

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Float, Boolean, JSON, func
+from sqlalchemy import Column, Integer, Text, ForeignKey, DateTime, Float, JSON, func
 from sqlalchemy.orm import relationship
 
 from app.db.models.base import Base
@@ -16,6 +16,9 @@ class Classification(Base):
 
     macro_confidence = Column(Float, nullable=False, default=0.0)
     detail_confidence = Column(Float, nullable=False, default=0.0)
+
+    secondary_predictions = Column(JSON, nullable=False, default=list)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     macro_category = relationship("MacroCategory", back_populates="classifications")

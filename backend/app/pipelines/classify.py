@@ -7,7 +7,7 @@ from app.services.llm_classifier import classify_with_openai
 from app.services.local_classifier import classify_with_local_model
 
 
-def run_classification_pipeline(db: Session, text: str, classifier: str,) -> dict:
+def run_classification_pipeline(db: Session, text: str, classifier: str) -> dict:
     cleaned_text = text.strip()
 
     if not cleaned_text:
@@ -26,14 +26,6 @@ def run_classification_pipeline(db: Session, text: str, classifier: str,) -> dic
     else:
         raise ValueError(f"Classificador ainda não suportado: {classifier_obj.name}")
 
-    response = {
-        "classifier": result["classifier"],
-        "macro": result["macro"],
-        "detail": result["detail"],
-        "macro_confidence": result["macro_confidence"],
-        "detail_confidence": result["detail_confidence"],
-    }
-
     category_repo = CategoryRepository(db)
     classification_repo = ClassificationRepository(db)
 
@@ -47,8 +39,9 @@ def run_classification_pipeline(db: Session, text: str, classifier: str,) -> dic
         detail_category_id=detail.id,
         macro_confidence=result["macro_confidence"],
         detail_confidence=result["detail_confidence"],
+        secondary_predictions=result["secondary_predictions"],
     )
 
     db.commit()
 
-    return response
+    return result

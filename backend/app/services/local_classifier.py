@@ -68,11 +68,12 @@ def classify_with_local_model(text: str, classifier: str) -> dict:
         )
 
     detail_pred, detail_confidence = _predict_with_confidence(detail_model, cleaned_text)
-
+    
     return {
         "classifier": classifier,
         "macro": macro_pred,
         "detail": detail_pred,
         "macro_confidence": macro_confidence,
         "detail_confidence": detail_confidence,
+        "secondary_predictions": [],
     }

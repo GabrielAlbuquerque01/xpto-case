@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import plotly.express as px
 import requests
@@ -9,7 +8,7 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="Classificação de Textos", layout="wide")
 st.title("Classificação de Textos")
-st.caption("Entrada unitária de texto e monitoramento de métricas salvas no banco.")
+st.caption("Entrada de texto e monitoramento de métricas salvas no banco.")
 
 
 def get_json(endpoint: str):
@@ -26,12 +25,7 @@ with tab_input:
 
     classifiers = get_json("/classifiers")
     classifier_options = [item["name"] for item in classifiers]
-
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        classifier = st.selectbox("Classificador", options=classifier_options)
-    with col2:
-        save_prediction = st.checkbox("Salvar classificação no banco", value=True)
+    classifier = st.selectbox("Classificador", options=classifier_options)
 
     if st.button("Classificar texto", use_container_width=True):
         if not text.strip():
@@ -54,6 +48,12 @@ with tab_input:
                 metric_cols[3].metric("Confiança detail", f"{data['detail_confidence']:.2%}")
 
                 st.write(f"**Classificador:** {data['classifier']}")
+
+                secondary_predictions = data.get("secondary_predictions", [])
+                if secondary_predictions:
+                    with st.expander("Possíveis classificações secundárias"):
+                        for item in secondary_predictions:
+                            st.write(f"- **Macro:** {item['macro']} | **Detail:** {item['detail']}")
 
             except requests.HTTPError:
                 try:
@@ -99,7 +99,7 @@ with tab_metrics:
             )
         if not detail_dist.empty:
             col_right.plotly_chart(
-                px.bar(detail_dist.head(10), x="label", y="value", title="Top 10 details"),
+                px.bar(detail_dist.head(10), x="label", y="value", title="Top 10 detalhadas"),
                 use_container_width=True,
             )
 
@@ -113,9 +113,18 @@ with tab_metrics:
         if not predictions_df.empty:
             if "created_at" in predictions_df.columns:
                 predictions_df["created_at"] = pd.to_datetime(predictions_df["created_at"])
+
+            if "secondary_predictions" in predictions_df.columns:
+                predictions_df["secondary_predictions"] = predictions_df["secondary_predictions"].apply(
+                    lambda items: " | ".join(
+                        [f"{item['macro']} -> {item['detail']}" for item in items]
+                    ) if items else "-"
+                )
+
             st.write("**Últimas classificações salvas**")
             st.dataframe(predictions_df, use_container_width=True, hide_index=True)
         else:
             st.info("Ainda não há classificações salvas no banco.")
+
     except Exception as e:
         st.error(f"Não foi possível carregar as métricas: {e}")

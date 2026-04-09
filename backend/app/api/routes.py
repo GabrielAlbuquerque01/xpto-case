@@ -65,6 +65,7 @@ def list_predictions(db: Session = Depends(get_db), limit: int = 100):
             detail=p.detail_category.name,
             macro_confidence=p.macro_confidence,
             detail_confidence=p.detail_confidence,
+            secondary_predictions=p.secondary_predictions or [],
             created_at=p.created_at,
         )
         for p in predictions
