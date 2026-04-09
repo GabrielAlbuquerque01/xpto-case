@@ -1,0 +1,79 @@
+,id_registro,texto_limpo,canal_origem,data,classe_macro,classe_detalhada,tamanho_texto,qntd_palavras_texto
+0,1,erro recorrente sistema tentar acessar determinadas funcionalidades,sistema,2025-03-08,Problemas Técnicos,Erro de Sistema / Aplicação,67,7
+1,2,pedido integracao sincronizacao dados,email,2025-03-22,Solicitações Operacionais,Integração com Sistemas Externos,37,4
+2,3,aguardando posicionamento,formulario,2025-03-02,Outros,Mensagem Genérica,25,2
+3,4,sistema apresentou erro inesperado executar funcionalidade solicitada,chat,2025-03-17,Problemas Técnicos,Erro de Sistema / Aplicação,69,7
+5,6,registro automatico sistema,formulario,2025-03-19,Outros,Registro Automático,27,3
+6,7,efetuei pagamento consta pendente sistema,formulario,2025-03-11,Financeiro e Cobrança,Pagamento Realizado mas Não Compensado,41,5
+7,8,identifiquei cobranca duplicada fatura,sistema,2025-03-04,Financeiro e Cobrança,Cobrança Indevida / Duplicada,38,4
+8,9,nao possivel exportar relatorio solicitado,sistema,2025-03-28,Problemas Técnicos,Erro de Exportação / Relatórios,42,5
+9,10,preciso reenviar boleto pagamento,email,2025-03-24,Financeiro e Cobrança,Segunda Via de Boleto,33,4
+10,11,atendimento excelente,email,2025-03-18,Feedback e Experiência,Feedback Positivo,21,2
+11,12,juros aplicados parecem incorretos,sistema,2025-03-19,Financeiro e Cobrança,Juros e Encargos,34,4
+12,13,solicito alteracao plano contratado,email,2025-03-22,Solicitações Operacionais,Alteração de Plano / Contrato,35,4
+13,14,necessario corrigir informacoes cadastro,email,2025-03-28,Solicitações Operacionais,Atualização Cadastral,40,4
+14,15,solicito atualizacao dados cadastrais,formulario,2025-03-09,Solicitações Operacionais,Atualização Cadastral,37,4
+15,16,interface poderia intuitiva,sistema,2025-03-12,Feedback e Experiência,Crítica de Usabilidade,27,3
+16,17,desejo mudar condicoes contrato,email,2025-03-20,Solicitações Operacionais,Alteração de Plano / Contrato,31,4
+17,18,pedido relatorio customizado conforme necessidade,chat,2025-03-06,Solicitações Operacionais,Customização de Relatórios,49,5
+18,19,interessante adicionar novos recursos,chat,2025-03-22,Feedback e Experiência,Sugestão de Nova Funcionalidade,37,4
+20,21,pedido estorno financeiro,email,2025-03-07,Financeiro e Cobrança,Reembolso / Estorno,25,3
+21,22,obrigado ajuda,chat,2025-03-21,Outros,Agradecimento Simples,14,2
+22,23,pedido nova funcionalidade,formulario,2025-03-05,Feedback e Experiência,Sugestão de Nova Funcionalidade,26,3
+24,25,log automatico registrado,formulario,2025-03-12,Outros,Registro Automático,25,3
+28,29,usabilidade precisa melhorar,email,2025-03-22,Feedback e Experiência,Crítica de Usabilidade,28,3
+29,30,banco dados nao responde requisicoes,sistema,2025-03-25,Problemas Técnicos,Falha de Banco de Dados,36,5
+30,31,pagamento realizado porem nao identificado,formulario,2025-03-06,Financeiro e Cobrança,Pagamento Realizado mas Não Compensado,42,5
+31,32,gostei nova atualizacao,sistema,2025-03-17,Feedback e Experiência,Feedback Positivo,23,3
+32,33,solicito criacao relatorio personalizado,sistema,2025-03-27,Solicitações Operacionais,Customização de Relatórios,40,4
+33,34,agradeco atendimento,chat,2025-03-12,Outros,Agradecimento Simples,20,2
+35,36,solicito reembolso valor pago,email,2025-03-30,Financeiro e Cobrança,Reembolso / Estorno,29,4
+36,37,duvidas sobre valor fatura,email,2025-03-08,Financeiro e Cobrança,Dúvidas sobre Fatura / Valores,26,4
+37,38,entro contato solicitar retorno,formulario,2025-03-27,Outros,Mensagem Genérica,31,4
+38,39,sistema lento apos ultima atualizacao,chat,2025-03-22,Problemas Técnicos,Problemas de Performance / Lentidão,37,5
+39,40,sistema poderia rapido,formulario,2025-03-31,Feedback e Experiência,Sugestão de Melhoria,22,3
+41,42,desejo informacoes sobre reembolso,sistema,2025-03-15,Financeiro e Cobrança,Reembolso / Estorno,34,4
+43,44,sistema encontra indisponivel momento,chat,2025-03-19,Problemas Técnicos,Indisponibilidade / Queda do Serviço,37,4
+44,45,solicito criacao novo usuario sistema,email,2025-03-08,Solicitações Operacionais,Criação / Gestão de Usuários,37,5
+45,46,aplicacao falhou durante uso normal exibindo mensagem erro generica,email,2025-03-17,Problemas Técnicos,Erro de Sistema / Aplicação,67,9
+46,47,necessario corrigir dados ja processados,formulario,2025-03-07,Solicitações Operacionais,Reprocessamento / Correção de Dados,40,5
+48,49,sugiro inclusao nova funcionalidade,email,2025-03-04,Feedback e Experiência,Sugestão de Nova Funcionalidade,35,4
+49,50,dificuldade navegacao sistema,formulario,2025-03-15,Feedback e Experiência,Crítica de Usabilidade,29,3
+52,53,necessario ajustar layout campos relatorio,chat,2025-03-14,Solicitações Operacionais,Customização de Relatórios,42,5
+53,54,dados inconsistentes precisam reprocessados,chat,2025-03-28,Solicitações Operacionais,Reprocessamento / Correção de Dados,43,4
+54,55,exportacao dados falha continuamente,email,2025-03-02,Problemas Técnicos,Erro de Exportação / Relatórios,36,4
+57,58,satisfeito sistema,formulario,2025-03-01,Feedback e Experiência,Feedback Positivo,18,2
+59,60,apenas agradecer,formulario,2025-03-05,Outros,Agradecimento Simples,16,2
+60,61,solicito reprocessamento dados incorretos,email,2025-03-19,Solicitações Operacionais,Reprocessamento / Correção de Dados,41,4
+62,63,ha lentidao excessiva navegar telas,chat,2025-03-02,Problemas Técnicos,Problemas de Performance / Lentidão,35,5
+64,65,falha conexao banco dados,formulario,2025-03-04,Problemas Técnicos,Falha de Banco de Dados,25,4
+67,68,valor cobrado nao condiz contratado,sistema,2025-03-08,Financeiro e Cobrança,Cobrança Indevida / Duplicada,35,5
+71,72,ha cobranca indevida extrato,email,2025-03-29,Financeiro e Cobrança,Cobrança Indevida / Duplicada,28,4
+76,77,mensagem detalhes especificos,sistema,2025-03-20,Outros,Mensagem Genérica,29,3
+84,85,pedido nova via cobranca,chat,2025-03-14,Financeiro e Cobrança,Segunda Via de Boleto,24,4
+85,86,necessario cadastrar novo acesso colaborador,sistema,2025-03-29,Solicitações Operacionais,Criação / Gestão de Usuários,44,5
+87,88,servico indisponivel impossibilitando uso plataforma,formulario,2025-03-20,Problemas Técnicos,Indisponibilidade / Queda do Serviço,52,5
+88,89,solicito integracao sistema externo via api,chat,2025-03-29,Solicitações Operacionais,Integração com Sistemas Externos,43,6
+102,103,duvida sobre juros aplicados fatura,sistema,2025-03-17,Financeiro e Cobrança,Juros e Encargos,35,5
+103,104,questionamento sobre encargos cobrados,sistema,2025-03-13,Financeiro e Cobrança,Juros e Encargos,38,4
+104,105,solicito segunda via boleto,chat,2025-03-14,Financeiro e Cobrança,Segunda Via de Boleto,27,4
+105,106,sugiro aprimorar algumas funcionalidades,sistema,2025-03-13,Feedback e Experiência,Sugestão de Melhoria,40,4
+114,115,sugiro melhorias sistema,email,2025-03-29,Feedback e Experiência,Sugestão de Melhoria,24,3
+121,122,pedido alteracao cadastral,sistema,2025-03-25,Solicitações Operacionais,Atualização Cadastral,26,3
+124,125,gostaria esclarecimentos sobre cobranca,email,2025-03-05,Financeiro e Cobrança,Dúvidas sobre Fatura / Valores,39,4
+125,126,necessario integrar plataforma sistema terceiros,chat,2025-03-23,Solicitações Operacionais,Integração com Sistemas Externos,48,5
+127,128,evento gerado automaticamente,email,2025-03-07,Outros,Registro Automático,29,3
+143,144,pedido agendamento treinamento,email,2025-03-19,Solicitações Operacionais,Solicitação de Treinamento,30,3
+148,149,pedido inclusao usuario perfil especifico,chat,2025-03-04,Solicitações Operacionais,Criação / Gestão de Usuários,41,5
+151,152,sistema nao reconheceu pagamento efetuado,sistema,2025-03-01,Financeiro e Cobrança,Pagamento Realizado mas Não Compensado,41,5
+154,155,pedido atualizacao plano atual,sistema,2025-03-20,Solicitações Operacionais,Alteração de Plano / Contrato,30,4
+157,158,aplicacao ar desde inicio manha,chat,2025-03-25,Problemas Técnicos,Indisponibilidade / Queda do Serviço,31,5
+178,179,performance degradada acessar dashboards,email,2025-03-05,Problemas Técnicos,Problemas de Performance / Lentidão,40,4
+185,186,nao consigo acessar sistema pois ocorre erro autenticacao credenciais corretas,chat,2025-03-18,Problemas Técnicos,Erro de Autenticação e Acesso,78,10
+202,203,login falhando impede acesso ambiente,formulario,2025-03-23,Problemas Técnicos,Erro de Autenticação e Acesso,37,5
+207,208,erro autenticar usuario apos redefinicao senha,sistema,2025-03-20,Problemas Técnicos,Erro de Autenticação e Acesso,46,6
+216,217,solicito treinamento equipe,chat,2025-03-28,Solicitações Operacionais,Solicitação de Treinamento,27,3
+240,241,erro gerar relatorio financeiro pdf csv,chat,2025-03-03,Problemas Técnicos,Erro de Exportação / Relatórios,39,6
+293,294,necessario capacitacao usuarios sistema,formulario,2025-03-13,Solicitações Operacionais,Solicitação de Treinamento,39,4
+352,353,valor fatura parece incorreto,formulario,2025-03-05,Financeiro e Cobrança,Dúvidas sobre Fatura / Valores,29,4
+400,401,erro consultar dados devido indisponibilidade banco,email,2025-03-14,Problemas Técnicos,Falha de Banco de Dados,51,6
