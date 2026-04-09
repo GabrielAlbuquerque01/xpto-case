@@ -24,9 +24,12 @@ with tab_input:
     st.subheader("Classificação unitária")
     text = st.text_area("Texto recebido", height=220, placeholder="Cole aqui a mensagem a ser classificada...")
 
+    classifiers = get_json("/classifiers")
+    classifier_options = [item["name"] for item in classifiers]
+
     col1, col2 = st.columns([1, 1])
     with col1:
-        model_type = st.selectbox("Modelo", options=["local_lr", "openai"])
+        classifier = st.selectbox("Classificador", options=classifier_options)
     with col2:
         save_prediction = st.checkbox("Salvar classificação no banco", value=True)
 
@@ -36,8 +39,7 @@ with tab_input:
         else:
             payload = {
                 "text": text,
-                "model_type": model_type,
-                "save_prediction": save_prediction,
+                "classifier": classifier,
             }
             try:
                 response = requests.post(f"{API_URL}/classify", json=payload, timeout=120)
@@ -48,34 +50,11 @@ with tab_input:
                 metric_cols = st.columns(4)
                 metric_cols[0].metric("Macro", data["macro"])
                 metric_cols[1].metric("Confiança macro", f"{data['macro_confidence']:.2%}")
-                metric_cols[2].metric("Micro", data["micro"])
-                metric_cols[3].metric("Confiança micro", f"{data['micro_confidence']:.2%}")
+                metric_cols[2].metric("Detail", data["detail"])
+                metric_cols[3].metric("Confiança detail", f"{data['detail_confidence']:.2%}")
 
-                st.write(f"**Modelo:** {data['model']}")
-                st.write(f"**Ambígua:** {'Sim' if data.get('is_ambiguous') else 'Não'}")
+                st.write(f"**Classificador:** {data['classifier']}")
 
-                metadata = data.get("metadata") or {}
-                justification = metadata.get("justification")
-                if justification:
-                    st.info(f"Justificativa curta: {justification}")
-
-                macro_candidates = metadata.get("macro_candidates") or []
-                micro_candidates = metadata.get("micro_candidates") or []
-                micro_candidates_by_macro = metadata.get("micro_candidates_by_macro") or {}
-
-                if macro_candidates:
-                    st.write("**Top macros sugeridas**")
-                    st.dataframe(pd.DataFrame(macro_candidates), use_container_width=True, hide_index=True)
-
-                if micro_candidates:
-                    st.write("**Top micros sugeridas**")
-                    st.dataframe(pd.DataFrame(micro_candidates), use_container_width=True, hide_index=True)
-                elif micro_candidates_by_macro:
-                    st.write("**Top micros por macro provável**")
-                    for macro_label, items in micro_candidates_by_macro.items():
-                        st.write(f"**{macro_label}**")
-                        st.dataframe(pd.DataFrame(items), use_container_width=True, hide_index=True)
-                        
             except requests.HTTPError:
                 try:
                     detail = response.json().get("detail", "Erro ao classificar.")
@@ -95,22 +74,20 @@ with tab_metrics:
         distributions = get_json("/metrics/distributions")
         predictions = get_json("/predictions?limit=200")
 
-        c1, c2, c3, c4, c5 = st.columns(5)
+        c1, c2, c3 = st.columns(3)
         c1.metric("Total de classificações", summary["total_predictions"])
-        c2.metric("Classificações ambíguas", summary["ambiguous_predictions"])
-        c3.metric("Taxa de ambiguidade", f"{summary['ambiguity_rate']:.2%}")
-        c4.metric("Confiança média macro", f"{summary['avg_macro_confidence']:.2%}")
-        c5.metric("Confiança média micro", f"{summary['avg_micro_confidence']:.2%}")
+        c2.metric("Confiança média macro", f"{summary['avg_macro_confidence']:.2%}")
+        c3.metric("Confiança média detail", f"{summary['avg_detail_confidence']:.2%}")
 
-        by_model = pd.DataFrame(summary.get("by_model", []))
+        by_classifier = pd.DataFrame(summary.get("by_classifier", []))
         macro_dist = pd.DataFrame(distributions.get("macro_distribution", []))
-        micro_dist = pd.DataFrame(distributions.get("micro_distribution", []))
+        detail_dist = pd.DataFrame(distributions.get("detail_distribution", []))
         daily_volume = pd.DataFrame(distributions.get("daily_volume", []))
         predictions_df = pd.DataFrame(predictions)
 
-        if not by_model.empty:
+        if not by_classifier.empty:
             st.plotly_chart(
-                px.pie(by_model, names="label", values="value", title="Distribuição por modelo"),
+                px.pie(by_classifier, names="label", values="value", title="Distribuição por classificador"),
                 use_container_width=True,
             )
 
@@ -120,9 +97,9 @@ with tab_metrics:
                 px.bar(macro_dist, x="label", y="value", title="Classificações por macro"),
                 use_container_width=True,
             )
-        if not micro_dist.empty:
+        if not detail_dist.empty:
             col_right.plotly_chart(
-                px.bar(micro_dist.head(10), x="label", y="value", title="Top 10 micros"),
+                px.bar(detail_dist.head(10), x="label", y="value", title="Top 10 details"),
                 use_container_width=True,
             )
 

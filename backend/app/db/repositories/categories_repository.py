@@ -27,7 +27,7 @@ class CategoryRepository:
     def get_detail_by_name_and_macro(self, name: str, macro_id: int):
         stmt = select(DetailCategory).where(
             DetailCategory.name == name,
-            DetailCategory.macro_category_id == macro_id
+            DetailCategory.macro_category_id == macro_id,
         )
         return self.db.execute(stmt).scalar_one_or_none()
 
@@ -47,14 +47,16 @@ class CategoryRepository:
         macros = (
             self.db.query(MacroCategory)
             .options(joinedload(MacroCategory.detail_categories))
-            .order_by(MacroCategory.name)
             .all()
         )
 
+        macro_labels = [macro.name for macro in macros]
+        macro_to_detail = {
+            macro.name: [detail.name for detail in macro.detail_categories]
+            for macro in macros
+        }
+
         return {
-            "macro_labels": [macro.name for macro in macros],
-            "macro_to_micro": {
-                macro.name: sorted([detail.name for detail in macro.detail_categories])
-                for macro in macros
-            }
+            "macro_labels": macro_labels,
+            "macro_to_detail": macro_to_detail,
         }

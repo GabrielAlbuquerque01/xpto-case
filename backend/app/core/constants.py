@@ -1,13 +1,9 @@
-REQUIRED_COLS_CSV = [
-    "id_registro",
-    "texto",
-    "canal_origem",
-    "data",
-    "classe_macro",
-    "classe_detalhada",
-]
+CLASSIFIERS_DESCRIPTIONS = {
+    "local_lr": "Classificador local hierárquico com TF-IDF + Logistic Regression.",
+    "openai": "Classificador via OpenAI com validação rígida de saída."
+}
 
-MACRO_MICRO_MAP = {
+MACRO_DETAIL_MAP = {
     "Problemas Técnicos": [
         "Erro de Autenticação e Acesso",
         "Erro de Exportação / Relatórios",

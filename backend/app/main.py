@@ -4,9 +4,10 @@ from fastapi import FastAPI
 
 import app.db.models
 from app.api.routes import router
-from app.core.constants import MACRO_MICRO_MAP
+from app.core.constants import MACRO_DETAIL_MAP, CLASSIFIERS_DESCRIPTIONS
 from app.db.models.base import Base
 from app.db.repositories.categories_repository import CategoryRepository
+from app.db.repositories.classifiers_repository import ClassifierRepository
 from app.db.session import SessionLocal, engine
 
 
@@ -16,11 +17,16 @@ async def lifespan(app: FastAPI):
 
     db = SessionLocal()
     try:
-        repo = CategoryRepository(db)
-        for macro_name, micro_names in MACRO_MICRO_MAP.items():
-            macro = repo.get_or_create_macro(macro_name)
-            for micro_name in micro_names:
-                repo.get_or_create_detail(micro_name, macro.id)
+        classifier_repo = ClassifierRepository(db)
+        for classifier_name, classifier_description in CLASSIFIERS_DESCRIPTIONS.items():
+            classifier_repo.get_or_create(name=classifier_name, description=classifier_description)
+
+        category_repo = CategoryRepository(db)
+        for macro_name, detail_names in MACRO_DETAIL_MAP.items():
+            macro = category_repo.get_or_create_macro(macro_name)
+            for detail_name in detail_names:
+                category_repo.get_or_create_detail(detail_name, macro.id)
+
         db.commit()
     except Exception:
         db.rollback()

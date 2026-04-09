@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.repositories.classifications_repository import ClassificationRepository
+from app.db.repositories.classifiers_repository import ClassifierRepository
 from app.db.session import get_db
 from app.pipelines.classify import run_classification_pipeline
 from app.schemas.classification import (
@@ -11,6 +12,7 @@ from app.schemas.classification import (
     MetricsDistributionResponse,
     MetricsSummaryResponse,
 )
+from app.schemas.classifier import ClassifierResponse
 
 router = APIRouter()
 
@@ -20,9 +22,17 @@ def health():
     return {"status": "ok"}
 
 
+@router.get("/classifiers", response_model=list[ClassifierResponse])
+def list_classifiers(db: Session = Depends(get_db)):
+    repo = ClassifierRepository(db)
+    return repo.list_all()
+
+
 @router.get("/models")
-def list_models():
-    return {"models": ["local_lr", "openai"]}
+def list_models_legacy(db: Session = Depends(get_db)):
+    repo = ClassifierRepository(db)
+    classifiers = repo.list_all()
+    return {"models": [item.name for item in classifiers]}
 
 
 @router.post("/classify", response_model=ClassificationResponse)
@@ -31,8 +41,7 @@ def classify(req: ClassificationRequest, db: Session = Depends(get_db)):
         return run_classification_pipeline(
             db=db,
             text=req.text,
-            model_type=req.model_type,
-            save_prediction=req.save_prediction,
+            classifier=req.classifier,
         )
     except ValueError as e:
         db.rollback()
@@ -51,12 +60,11 @@ def list_predictions(db: Session = Depends(get_db), limit: int = 100):
         GetClassificationResponse(
             id=p.id,
             text=p.text,
-            model_type=p.model_type,
+            classifier=p.classifier.name,
             macro=p.macro_category.name,
-            micro=p.detail_category.name,
+            detail=p.detail_category.name,
             macro_confidence=p.macro_confidence,
-            micro_confidence=p.detail_confidence,
-            is_ambiguous=p.is_ambiguous,
+            detail_confidence=p.detail_confidence,
             created_at=p.created_at,
         )
         for p in predictions

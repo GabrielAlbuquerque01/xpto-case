@@ -2,60 +2,53 @@ from sqlalchemy.orm import Session
 
 from app.db.repositories.categories_repository import CategoryRepository
 from app.db.repositories.classifications_repository import ClassificationRepository
+from app.db.repositories.classifiers_repository import ClassifierRepository
 from app.services.llm_classifier import classify_with_openai
 from app.services.local_classifier import classify_with_local_model
 
 
-VALID_MODELS = {"local_lr", "openai"}
-
-
-def run_classification_pipeline(
-    db: Session,
-    text: str,
-    model_type: str,
-    save_prediction: bool = True
-) -> dict:
+def run_classification_pipeline(db: Session, text: str, classifier: str,) -> dict:
     cleaned_text = text.strip()
 
     if not cleaned_text:
         raise ValueError("O texto não pode estar vazio.")
 
-    if model_type not in VALID_MODELS:
-        raise ValueError(f"Modelo inválido: {model_type}")
+    classifier_repo = ClassifierRepository(db)
+    classifier_obj = classifier_repo.get_by_name(classifier)
 
-    if model_type == "local_lr":
-        result = classify_with_local_model(cleaned_text, model_type)
-    else:
+    if not classifier_obj:
+        raise ValueError(f"Classificador inválido: {classifier}")
+
+    if classifier_obj.name == "local_lr":
+        result = classify_with_local_model(cleaned_text, classifier_obj.name)
+    elif classifier_obj.name == "openai":
         result = classify_with_openai(db, cleaned_text)
+    else:
+        raise ValueError(f"Classificador ainda não suportado: {classifier_obj.name}")
 
     response = {
+        "classifier": result["classifier"],
         "macro": result["macro"],
-        "macro_confidence": result.get("macro_confidence", 1.0),
-        "micro": result["micro"],
-        "micro_confidence": result.get("micro_confidence", 1.0),
-        "model": result["model"],
-        "is_ambiguous": result.get("is_ambiguous", False),
-        "metadata": result.get("metadata"),
+        "detail": result["detail"],
+        "macro_confidence": result["macro_confidence"],
+        "detail_confidence": result["detail_confidence"],
     }
 
-    if save_prediction:
-        category_repo = CategoryRepository(db)
-        classification_repo = ClassificationRepository(db)
+    category_repo = CategoryRepository(db)
+    classification_repo = ClassificationRepository(db)
 
-        macro = category_repo.get_or_create_macro(result["macro"])
-        detail = category_repo.get_or_create_detail(result["micro"], macro.id)
+    macro = category_repo.get_or_create_macro(result["macro"])
+    detail = category_repo.get_or_create_detail(result["detail"], macro.id)
 
-        classification_repo.create_classification(
-            text=cleaned_text,
-            model_type=result["model"],
-            macro_category_id=macro.id,
-            detail_category_id=detail.id,
-            macro_confidence=result.get("macro_confidence", 1.0),
-            detail_confidence=result.get("micro_confidence", 1.0),
-            is_ambiguous=result.get("is_ambiguous", False),
-            metadata_json=result.get("metadata"),
-        )
+    classification_repo.create_classification(
+        text=cleaned_text,
+        classifier_id=classifier_obj.id,
+        macro_category_id=macro.id,
+        detail_category_id=detail.id,
+        macro_confidence=result["macro_confidence"],
+        detail_confidence=result["detail_confidence"],
+    )
 
-        db.commit()
+    db.commit()
 
     return response
