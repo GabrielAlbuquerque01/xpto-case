@@ -2,11 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt /tmp/requirements.txt
+COPY frontend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 COPY frontend /app/frontend
-ENV PYTHONUNBUFFERED=1
-EXPOSE 8501
 
-CMD ["streamlit", "run", "/app/frontend/app.py", "--server.address=0.0.0.0", "--server.port=8501"]
+WORKDIR /app/frontend
+
+CMD ["streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501"]

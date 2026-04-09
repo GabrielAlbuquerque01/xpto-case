@@ -61,12 +61,21 @@ with tab_input:
 
                 macro_candidates = metadata.get("macro_candidates") or []
                 micro_candidates = metadata.get("micro_candidates") or []
+                micro_candidates_by_macro = metadata.get("micro_candidates_by_macro") or {}
+
                 if macro_candidates:
                     st.write("**Top macros sugeridas**")
                     st.dataframe(pd.DataFrame(macro_candidates), use_container_width=True, hide_index=True)
+
                 if micro_candidates:
                     st.write("**Top micros sugeridas**")
                     st.dataframe(pd.DataFrame(micro_candidates), use_container_width=True, hide_index=True)
+                elif micro_candidates_by_macro:
+                    st.write("**Top micros por macro provável**")
+                    for macro_label, items in micro_candidates_by_macro.items():
+                        st.write(f"**{macro_label}**")
+                        st.dataframe(pd.DataFrame(items), use_container_width=True, hide_index=True)
+                        
             except requests.HTTPError:
                 try:
                     detail = response.json().get("detail", "Erro ao classificar.")
